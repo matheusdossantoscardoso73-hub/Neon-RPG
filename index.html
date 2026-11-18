@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080d18">
+<title>NEON RPG — Online</title>
+<style>
+:root{--bg:#080d18;--panel:#101a2a;--cyan:#00e5ff;--pink:#ff3d81;--gold:#ffc857;--muted:#91a4ba;--line:#254258;--text:#edf7ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#142b43 0,transparent 42%),var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{padding:17px 15px 13px;border-bottom:1px solid var(--line);background:#090f1ddd;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand small{color:var(--cyan);letter-spacing:2px;font-weight:800}.brand h1{font-size:25px;letter-spacing:3px;margin:2px 0 0;text-shadow:0 0 16px #00d9ff66}.status{font-size:10px;color:#ffd36a;border:1px solid #80652c;border-radius:30px;padding:5px 9px}
+main{max-width:900px;margin:auto;padding:13px 11px 80px}.panel{background:linear-gradient(145deg,#111d2d,#0d1625);border:1px solid var(--line);border-radius:14px;padding:13px;margin:11px 0;box-shadow:0 10px 35px #0003}
+h2{font-size:13px;letter-spacing:1.6px;color:var(--cyan);margin:0 0 11px;text-transform:uppercase}label{display:block;font-size:10px;color:var(--muted);letter-spacing:1px;margin:9px 0 5px}
+input,select,textarea{width:100%;background:#08111e;color:var(--text);border:1px solid #29465c;border-radius:9px;padding:10px;font:inherit;outline:none;min-width:0}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #00e5ff22}
+button{border:1px solid #24758a;background:#073040;color:#dffaff;border-radius:9px;padding:10px 12px;font-weight:750;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button.primary{background:linear-gradient(90deg,#006a82,#124e79);border-color:var(--cyan)}button.danger{background:#401b2d;border-color:#a83b68}button.ghost{background:#152338;border-color:#344b62}
+.row{display:flex;gap:8px;align-items:end}.row>*{flex:1;min-width:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#0a1422;border:1px solid var(--line);border-radius:10px;padding:10px}.stat b{font-size:21px;display:block}.stat span{font-size:9px;letter-spacing:1px;color:var(--muted)}.hp{color:#ff658a}.en{color:var(--cyan)}.xp{color:var(--gold)}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:11px 0}nav button{font-size:11px;padding:10px 3px}nav button.active{background:#063c4c;border-color:var(--cyan);color:var(--cyan)}
+.view{display:none}.view.active{display:block}.muted{color:var(--muted);font-size:11px}.log{background:#07111d;border:1px solid #1e3449;border-radius:10px;padding:9px;max-height:290px;overflow:auto}.msg{padding:8px 2px;border-bottom:1px solid #1b2a3b;overflow-wrap:anywhere}.msg:last-child{border:0}.msg strong{color:var(--cyan);font-size:11px}.msg p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}.msg a{color:#71eaff;text-decoration:underline;overflow-wrap:anywhere}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;background:#0a1422;border:1px solid #22384d;border-radius:9px;margin:7px 0}.item span{overflow-wrap:anywhere}
+.notice{border-left:3px solid var(--gold);padding:8px 10px;background:#211c12;color:#e9d9ad;font-size:11px;border-radius:5px}.good{color:#7fffd4}.bad{color:#ff7898}.hidden{display:none!important}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions button{flex:1}
+footer{text-align:center;color:#5d7890;font-size:10px;letter-spacing:1px;padding:14px}
+@media(min-width:650px){main{padding:20px 16px 80px}.panel{padding:17px}.stats{gap:12px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div><small>PLATAFORMA DE CAMPANHA</small><h1>NEON RPG</h1></div><div class="status" id="connectionBadge">● NÃO CONECTADO</div></div></header>
+<main>
+<section class="panel" id="setup">
+ <h2>Conexão com Firebase</h2>
+ <p class="muted">Cole a configuração do seu aplicativo Web Firebase. Ela é a configuração pública do cliente; nunca cole chaves privadas ou arquivos de conta de serviço.</p>
+ <div class="row"><div><label>API KEY</label><input id="apiKey" autocomplete="off" placeholder="AIza..."></div><div><label>PROJECT ID</label><input id="projectId" autocomplete="off" placeholder="meu-projeto"></div></div>
+ <div class="row"><div><label>AUTH DOMAIN</label><input id="authDomain" autocomplete="off" placeholder="meu-projeto.firebaseapp.com"></div><div><label>APP ID</label><input id="appId" autocomplete="off" placeholder="1:...:web:..."></div></div>
+ <details><summary class="muted">Campos opcionais da configuração</summary><div class="row"><div><label>STORAGE BUCKET</label><input id="storageBucket" placeholder="meu-projeto.appspot.com"></div><div><label>MESSAGING SENDER ID</label><input id="messagingSenderId" placeholder="123456789"></div></div></details>
+ <div class="actions" style="margin-top:10px"><button class="primary" id="connect">Conectar / entrar anonimamente</button><button class="ghost" id="clearConfig">Limpar config salva</button></div>
+ <p id="connectionInfo" class="muted">Aguardando configuração.</p>
+</section>
+<section class="panel">
+ <h2>Sala de campanha</h2>
+ <div class="row"><div><label>PERSONAGEM</label><input id="charName" maxlength="28" placeholder="Nome do mercenário"></div><div><label>SEU PAPEL</label><input id="role" value="Desconectado" readonly></div></div>
+ <div class="row"><div><label>CÓDIGO DA SALA</label><input id="roomCode" maxlength="40" placeholder="Cole o código recebido"></div><button class="primary" id="joinRoom" disabled>Entrar</button></div>
+ <div class="actions" style="margin-top:8px"><button id="createRoom" class="primary" disabled>Criar sala como mestre</button><button id="copyRoom" class="ghost" disabled>Copiar convite</button><button id="leaveRoom" class="danger" disabled>Sair da sala</button></div>
+ <p class="muted" id="roomInfo">Conecte ao Firebase para criar ou entrar em uma sala.</p>
+</section>
+<section class="stats">
+ <div class="stat"><span>INTEGRIDADE</span><b class="hp" id="hpOut">100</b><span>HP</span></div>
+ <div class="stat"><span>ENERGIA</span><b class="en" id="enOut">80</b><span>EN</span></div>
+ <div class="stat"><span>EXPERIÊNCIA</span><b class="xp" id="xpOut">0</b><span>XP</span></div>
+</section>
+<nav><button class="active" data-tab="dash">Ficha</button><button data-tab="chat">Chat</button><button data-tab="dice">Dados</button><button data-tab="bag">Inventário</button></nav>
+<section class="view active" id="dash">
+ <div class="panel"><h2>Estado biométrico</h2>
+ <label>VIDA <span id="hpLabel">100/100</span></label><input id="hp" type="range" min="0" max="100" value="100" disabled>
+ <label>ENERGIA <span id="enLabel">80/100</span></label><input id="energy" type="range" min="0" max="100" value="80" disabled>
+ <label>EXPERIÊNCIA</label><input id="xp" type="number" min="0" max="999999" value="0" disabled>
+ <label>HISTÓRIA / DESCRIÇÃO</label><textarea id="description" rows="3" placeholder="História, missão, contatos e objetivos..." disabled></textarea>
+ <button class="primary" id="saveCharacter" style="margin-top:8px" disabled>Salvar ficha</button>
+ </div>
+ <div class="panel hidden" id="masterPanel"><h2>Console do mestre</h2><label>PERSONAGEM SOB GERÊNCIA</label><select id="targetMember"></select><div class="row"><div><label>VIDA</label><input id="masterHp" type="number" min="0" max="100"></div><div><label>ENERGIA</label><input id="masterEnergy" type="number" min="0" max="100"></div><div><label>XP</label><input id="masterXp" type="number" min="0" max="999999"></div></div><button class="primary" id="applyMaster" style="margin-top:9px">Aplicar alterações</button><p class="muted">Somente o criador da sala recebe permissão de mestre nas regras do banco.</p></div>
+ <div class="panel"><h2>Participantes online</h2><div id="memberList" class="muted">Nenhuma sala conectada.</div></div>
+</section>
+<section class="view" id="chat"><div class="panel"><h2>Canal de comunicação</h2><div class="log" id="messages" aria-live="polite"></div><label>MENSAGEM OU LINK</label><textarea id="message" rows="2" placeholder="Escreva ou cole um link https://..."></textarea><button class="primary" id="send" disabled style="width:100%;margin-top:8px">Transmitir mensagem</button><p class="muted">Links HTTP/HTTPS aparecem clicáveis. O navegador pedirá confirmação antes de abrir.</p></div></section>
+<section class="view" id="dice"><div class="panel"><h2>Terminal de rolagem</h2><div class="row"><div><label>TIPO DE DADO</label><select id="die"><option value="4">D4</option><option value="6">D6</option><option value="8">D8</option><option value="10">D10</option><option value="12">D12</option><option value="20" selected>D20</option><option value="100">D100</option></select></div><button class="primary" id="roll" disabled>Rolar dado</button></div><h2 style="margin-top:16px">Resultado</h2><div class="stat"><b id="result" style="color:var(--gold);font-size:32px">—</b><span id="resultType">AGUARDANDO ROLAGEM</span></div><div class="log" id="rollLog" style="margin-top:10px"></div></div></section>
+<section class="view" id="bag"><div class="panel"><h2>Inventário digital</h2><div class="row"><input id="newItem" maxlength="50" placeholder="Adicionar equipamento" disabled><button class="primary" id="addItem" disabled>Adicionar</button></div><div id="items"></div></div></section>
+<footer>NEON RPG // ONLINE BUILD 0.3 // FIREBASE</footer>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const $=id=>document.getElementById(id);
+let app=null,auth=null,db=null,user=null,roomId=null,roomRole=null,unsubs=[],currentCharacter=null,members=[],characters={};
+const configIds=["apiKey","projectId","authDomain","appId","storageBucket","messagingSenderId"];
+const configFields=["apiKey","projectId","authDomain","appId","storageBucket","messagingSenderId"];
+function setInfo(msg,ok=false){$("connectionInfo").textContent=msg;$("connectionInfo").className=ok?"muted good":"muted"}
+function badge(msg,ok=false){$("connectionBadge").textContent="● "+msg;$("connectionBadge").style.color=ok?"#7fffd4":"#ffd36a"}
+function enableRoomControls(v){["createRoom","joinRoom"].forEach(id=>$(id).disabled=!v)}
+function cleanListeners(){unsubs.forEach(fn=>{try{fn()}catch{}});unsubs=[]}
+function cfgFromInputs(){const c={};configIds.forEach(id=>{const val=$(id).value.trim();if(val)c[id]=val});return c}
+function saveCfg(c){localStorage.setItem("neonFirebaseConfig",JSON.stringify(c))}
+function loadCfg(){try{const c=JSON.parse(localStorage.getItem("neonFirebaseConfig")||"{}");configIds.forEach(k=>$(k).value=c[k]||"")}catch{}}
+async function connect(){
+ const cfg=cfgFromInputs();
+ if(!cfg.apiKey||!cfg.projectId||!cfg.authDomain||!cfg.appId){setInfo("Preencha API Key, Project ID, Auth Domain e App ID.");return}
+ try{
+  if(!app){app=initializeApp(cfg);auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,async u=>{user=u;if(u){badge("AUTENTICADO",true);setInfo("Autenticação anônima ativa. UID: "+u.uid.slice(0,8)+"…",true);enableRoomControls(true)}else{badge("SEM LOGIN");enableRoomControls(false)}})}
+  saveCfg(cfg);await signInAnonymously(auth);setInfo("Conectado ao Firebase. Login anônimo concluído.",true);
+ }catch(e){console.error(e);setInfo("Falha ao conectar: "+(e.message||e));badge("ERRO")}
+}
+function requireRoom(){if(!db||!user||!roomId)throw new Error("Conecte e entre em uma sala primeiro.")}
+async function createRoom(){
+ try{if(!user)throw new Error("Conecte primeiro.");const name=$("charName").value.trim()||"Mestre";
+ const roomRef=doc(collection(db,"rooms"));roomId=roomRef.id;roomRole="master";
+ await setDoc(roomRef,{ownerUid:user.uid,createdAt:serverTimestamp(),title:"Campanha NEON RPG"});
+ await setDoc(doc(db,"rooms",roomId,"members",user.uid),{uid:user.uid,name,role:"master",joinedAt:serverTimestamp()});
+ await setDoc(doc(db,"rooms",roomId,"characters",user.uid),{uid:user.uid,name,hp:100,energy:80,xp:0,description:"",items:["Pistola inteligente","Kit médico","Chip de acesso"],updatedAt:serverTimestamp()});
+ $("roomCode").value=roomId;activateRoom();setInfo("Sala criada. Compartilhe o código completo para convidar jogadores.",true);
+ }catch(e){console.error(e);setInfo("Não foi possível criar a sala: "+e.message)}
+}
+async function joinRoom(){
+ try{if(!user)throw new Error("Conecte primeiro.");const code=$("roomCode").value.trim();if(!code)throw new Error("Digite o código da sala.");
+ const ref=doc(db,"rooms",code),snap=await getDoc(ref);if(!snap.exists())throw new Error("Sala não encontrada. Confira o código.");
+ const name=$("charName").value.trim()||"Mercenário";roomId=code;roomRole="player";
+ await setDoc(doc(db,"rooms",roomId,"members",user.uid),{uid:user.uid,name,role:"player",joinedAt:serverTimestamp()});
+ const charRef=doc(db,"rooms",roomId,"characters",user.uid),charSnap=await getDoc(charRef);
+ if(!charSnap.exists())await setDoc(charRef,{uid:user.uid,name,hp:100,energy:80,xp:0,description:"",items:[],updatedAt:serverTimestamp()});
+ activateRoom();setInfo("Você entrou na sala "+roomId+".",true);
+ }catch(e){console.error(e);setInfo("Não foi possível entrar: "+e.message)}
+}
+function activateRoom(){
+ cleanListeners();$("role").value=roomRole==="master"?"Mestre":"Jogador";$("roomInfo").textContent="Sala: "+roomId+" • Papel: "+(roomRole==="master"?"Mestre":"Jogador");
+ $("copyRoom").disabled=false;$("leaveRoom").disabled=false;$("send").disabled=false;$("roll").disabled=false;$("saveCharacter").disabled=false;$("hp").disabled=false;$("energy").disabled=false;$("xp").disabled=false;$("description").disabled=false;$("newItem").disabled=false;$("addItem").disabled=false;
+ $("masterPanel").classList.toggle("hidden",roomRole!=="master");
+ unsubs.push(onSnapshot(query(collection(db,"rooms",roomId,"messages"),orderBy("createdAt","asc"),limit(100)),snap=>{const arr=snap.docs.map(d=>d.data());renderMessages(arr)}));
+ unsubs.push(onSnapshot(query(collection(db,"rooms",roomId,"rolls"),orderBy("createdAt","desc"),limit(30)),snap=>{renderRolls(snap.docs.map(d=>d.data()))}));
+ unsubs.push(onSnapshot(doc(db,"rooms",roomId,"characters",user.uid),snap=>{if(snap.exists()){currentCharacter=snap.data();renderCharacter(currentCharacter)}}));
+ unsubs.push(onSnapshot(collection(db,"rooms",roomId,"members"),snap=>{members=snap.docs.map(d=>d.data());renderMembers();if(roomRole==="master")loadMasterTargets()}));
+ if(roomRole==="master")unsubs.push(onSnapshot(collection(db,"rooms",roomId,"characters"),snap=>{characters={};snap.docs.forEach(d=>characters[d.id]=d.data());loadMasterTargets()}));
+}
+function leaveRoom(){cleanListeners();roomId=null;roomRole=null;currentCharacter=null;members=[];characters={};$("role").value="Desconectado";$("roomInfo").textContent="Você saiu da sala.";$("copyRoom").disabled=true;$("leaveRoom").disabled=true;["send","roll","saveCharacter","hp","energy","xp","description","newItem","addItem"].forEach(id=>$(id).disabled=true);$("masterPanel").classList.add("hidden");renderMessages([]);renderRolls([]);renderMembers()}
+function renderCharacter(c){$("charName").value=c.name||"Mercenário";$("hp").value=c.hp??100;$("energy").value=c.energy??80;$("xp").value=c.xp??0;$("description").value=c.description||"";$("hpOut").textContent=c.hp??100;$("enOut").textContent=c.energy??80;$("xpOut").textContent=c.xp??0;$("hpLabel").textContent=(c.hp??100)+"/100";$("enLabel").textContent=(c.energy??80)+"/100";renderItems(c.items||[])}
+async function saveCharacter(){try{requireRoom();const c={uid:user.uid,name:$("charName").value.trim()||"Mercenário",hp:clamp($("hp").value,0,100),energy:clamp($("energy").value,0,100),xp:clamp($("xp").value,0,999999),description:$("description").value,items:currentCharacter?.items||[],updatedAt:serverTimestamp()};await setDoc(doc(db,"rooms",roomId,"characters",user.uid),c,{merge:true});setInfo("Ficha sincronizada.",true)}catch(e){setInfo("Erro ao salvar ficha: "+e.message)}}
+function clamp(v,min,max){return Math.max(min,Math.min(max,Number(v)||0))}
+async function sendMessage(){try{requireRoom();const text=$("message").value.trim();if(!text)return;await addDoc(collection(db,"rooms",roomId,"messages"),{uid:user.uid,name:$("charName").value.trim()||"Mercenário",role:roomRole,text,createdAt:serverTimestamp()});$("message").value=""}catch(e){setInfo("Falha ao enviar: "+e.message)}}
+async function rollDice(){try{requireRoom();const sides=+$("die").value,value=Math.floor(Math.random()*sides)+1;await addDoc(collection(db,"rooms",roomId,"rolls"),{uid:user.uid,name:$("charName").value.trim()||"Mercenário",sides,value,createdAt:serverTimestamp()});$("result").textContent=value;$("resultType").textContent="RESULTADO • D"+sides}catch(e){setInfo("Falha ao rolar: "+e.message)}}
+function renderMessages(arr){const box=$("messages");box.replaceChildren();arr.forEach(m=>{const div=document.createElement("div");div.className="msg";const strong=document.createElement("strong");strong.textContent=(m.role==="master"?"MESTRE":"JOGADOR")+" • "+(m.name||"Mercenário");const p=document.createElement("p");appendLinkText(p,m.text||"");div.append(strong,p);box.append(div)});box.scrollTop=box.scrollHeight}
+function appendLinkText(parent,text){
+ const re=/(https?:\/\/[^\s<>"']+)/gi;
+ let last=0, match;
+ while((match=re.exec(text))!==null){
+  parent.append(document.createTextNode(text.slice(last,match.index)));
+  const raw=match[0].replace(/[),.!?]+$/g,"");
+  const suffix=match[0].slice(raw.length);
+  try{
+   const url=new URL(raw);
+   if(url.protocol!=="http:" && url.protocol!=="https:") throw new Error("Protocolo inválido");
+   const link=document.createElement("a");
+   link.href=url.href; link.textContent=url.hostname+(url.pathname!=="/"?url.pathname:"");
+   link.target="_blank"; link.rel="noopener noreferrer";
+   link.addEventListener("click",event=>{if(!confirm("Abrir este link externo?\n"+url.href)) event.preventDefault();});
+   parent.append(link);
+  }catch(error){parent.append(document.createTextNode(raw));}
+  parent.append(document.createTextNode(suffix));
+  last=re.lastIndex;
+ }
+ parent.append(document.createTextNode(text.slice(last)));
+}
+function renderRolls(arr){const box=$("rollLog");box.replaceChildren();arr.forEach(r=>{const d=document.createElement("div");d.className="msg";d.textContent=(r.name||"Jogador")+" rolou D"+r.sides+": "+r.value;box.append(d)})}
+function renderItems(items){const box=$("items");box.replaceChildren();items.forEach((it,i)=>{const row=document.createElement("div");row.className="item";const span=document.createElement("span");span.textContent="▣ "+it;const b=document.createElement("button");b.className="danger";b.textContent="Remover";b.onclick=()=>changeItems(items.filter((_,j)=>i!==j));row.append(span,b);box.append(row)})}
+async function changeItems(items){try{requireRoom();await updateDoc(doc(db,"rooms",roomId,"characters",user.uid),{items,updatedAt:serverTimestamp()})}catch(e){setInfo("Erro no inventário: "+e.message)}}
+function renderMembers(){const box=$("memberList");box.replaceChildren();if(!members.length){box.textContent="Nenhum participante conectado.";return}members.forEach(m=>{const d=document.createElement("div");d.className="item";const s=document.createElement("span");s.textContent=(m.name||"Mercenário")+" • "+(m.role==="master"?"MESTRE":"JOGADOR");d.append(s);box.append(d)})}
+function loadMasterTargets(){const sel=$("targetMember"),old=sel.value;sel.replaceChildren();Object.entries(characters).forEach(([uid,c])=>{const o=document.create
